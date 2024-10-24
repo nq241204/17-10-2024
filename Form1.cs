@@ -8,40 +8,76 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace FormLogin
+namespace FormQLDSSV
 {
     public partial class Form1 : Form
     {
+        public class SinhVien
+        {
+            public string MaSinhVien { get; set; }
+            public string HoTen { get; set; }
+            public string LopHoc { get; set; }
+        }
+
+        private List<SinhVien> danhSachSinhVien = new List<SinhVien>();
         public Form1()
         {
             InitializeComponent();
         }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void HienThiDanhSach()
         {
-            // Kiểm tra tên đăng nhập và mật khẩu
-            string username = txtUsername.Text;
-            string password = txtPassword.Text;
+            dataGridviewSV.DataSource = null;
+            dataGridviewSV.DataSource = danhSachSinhVien;
+        }
+        private void label2_Click(object sender, EventArgs e)
+        {
 
-            if (username == "admin" && password == "1234")
-            {
-                MessageBox.Show("Đăng nhập thành công", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("Đăng nhập thất bại", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            // Đóng form khi nhấn nút Thoát
-            this.Close();
+            int index = dataGridviewSV.CurrentRow.Index;
+            danhSachSinhVien[index].MaSinhVien = mssv.Text;
+            danhSachSinhVien[index].HoTen = tensv.Text;
+            danhSachSinhVien[index].LopHoc = LopSV.Text;
+            HienThiDanhSach();
+            xoa();
+        }
+        private void xoa()
+        {
+            mssv.Clear();
+            tensv.Clear();
+            LopSV.Clear();
+        }
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridviewSV.CurrentRow != null)
+            {
+                mssv.Text = dataGridviewSV.CurrentRow.Cells[0].Value.ToString();
+                tensv.Text = dataGridviewSV.CurrentRow.Cells[1].Value.ToString();
+                LopSV.Text = dataGridviewSV.CurrentRow.Cells[2].Value.ToString();
+            }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
+            SinhVien sv = new SinhVien
+            {
+                MaSinhVien = mssv.Text,
+                HoTen = tensv.Text,
+                LopHoc = LopSV.Text
+            };
+            danhSachSinhVien.Add(sv);
+            HienThiDanhSach();
+            xoa();
+        }
 
+        private void button3_Click(object sender, EventArgs e)
+        {
+            int index = dataGridviewSV.CurrentRow.Index;
+            danhSachSinhVien.RemoveAt(index);
+            HienThiDanhSach();
+            xoa();
         }
     }
 }
