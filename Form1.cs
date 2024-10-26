@@ -8,76 +8,64 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace FormQLDSSV
+namespace FormTraCuuDiemSV
 {
-    public partial class Form1 : Form
+    public partial class btntracuu : Form
     {
-        public class SinhVien
-        {
-            public string MaSinhVien { get; set; }
-            public string HoTen { get; set; }
-            public string LopHoc { get; set; }
-        }
-
-        private List<SinhVien> danhSachSinhVien = new List<SinhVien>();
-        public Form1()
+        private Dictionary<string, string> danhSachSinhVien;
+        public btntracuu()
         {
             InitializeComponent();
+            danhSachSinhVien = new Dictionary<string, string>
+            {
+                { "22810310416", "Nguyen Dang Khoa - Diem: 8.5" },
+                { "22810310412", "Nhu Quynh - Diem: 9.0" },
+                { "22810310419", "Phan Ngoc - Diem: 7.5" }
+            };
         }
-        private void HienThiDanhSach()
+
+     
+        private void txtmasv_TextChanged(object sender, EventArgs e)
         {
-            dataGridviewSV.DataSource = null;
-            dataGridviewSV.DataSource = danhSachSinhVien;
+
         }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string maSV = txtmaSV.Text.Trim();
+
+            // Kiểm tra mã sinh viên trong danh sách
+            if (danhSachSinhVien.ContainsKey(maSV))
+            {
+                // Hiển thị thông tin sinh viên
+                txtThongTin.Text = danhSachSinhVien[maSV];
+            }
+            else
+            {
+                // Thông báo khi không tìm thấy mã sinh viên
+                MessageBox.Show("Không tìm thấy mã sinh viên!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtThongTin.Text = ""; // Xóa thông tin cũ nếu có
+            }
+        }
+
         private void label2_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void btntracuu_Load(object sender, EventArgs e)
         {
-            int index = dataGridviewSV.CurrentRow.Index;
-            danhSachSinhVien[index].MaSinhVien = mssv.Text;
-            danhSachSinhVien[index].HoTen = tensv.Text;
-            danhSachSinhVien[index].LopHoc = LopSV.Text;
-            HienThiDanhSach();
-            xoa();
-        }
-        private void xoa()
-        {
-            mssv.Clear();
-            tensv.Clear();
-            LopSV.Clear();
-        }
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (dataGridviewSV.CurrentRow != null)
-            {
-                mssv.Text = dataGridviewSV.CurrentRow.Cells[0].Value.ToString();
-                tensv.Text = dataGridviewSV.CurrentRow.Cells[1].Value.ToString();
-                LopSV.Text = dataGridviewSV.CurrentRow.Cells[2].Value.ToString();
-            }
+
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void txtThongTin_TextChanged(object sender, EventArgs e)
         {
-            SinhVien sv = new SinhVien
-            {
-                MaSinhVien = mssv.Text,
-                HoTen = tensv.Text,
-                LopHoc = LopSV.Text
-            };
-            danhSachSinhVien.Add(sv);
-            HienThiDanhSach();
-            xoa();
-        }
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            int index = dataGridviewSV.CurrentRow.Index;
-            danhSachSinhVien.RemoveAt(index);
-            HienThiDanhSach();
-            xoa();
         }
     }
 }
