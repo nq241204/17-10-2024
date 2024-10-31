@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace FormTraCuuDiemSV
+namespace SalesApp
 {
     internal static class Program
     {
@@ -16,7 +16,7 @@ namespace FormTraCuuDiemSV
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new btntracuu());
+            Application.Run(new Form1());
         }
     }
 }
