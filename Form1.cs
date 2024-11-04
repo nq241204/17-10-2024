@@ -7,154 +7,164 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
-namespace SalesApp
+namespace Quanlykhachhangvahoadon
 {
-    
-    
     public partial class Form1 : Form
     {
-        private List<Product> productList;
-        private ShoppingCart shoppingCart;
-        
+        private List<Customer> customers = new List<Customer>();
+        private List<Service> services = new List<Service>();
+        private List<Service> invoiceServices = new List<Service>();
+        private int customerCounter = 1;
+        private int invoiceCounter = 1;
         public Form1()
         {
             InitializeComponent();
-            InitializeProductList();
-            shoppingCart = new ShoppingCart();
-            LoadProductsToGrid();
+            InitializeData();
+            LoadCustomerData();
+            LoadServiceData();
         }
-        private void InitializeProductList()
+        private void InitializeData()
         {
-            // Tạo một số sản phẩm mẫu
-            productList = new List<Product>
-        {
-            new Product("Sản phẩm A", 100000, 10),
-            new Product("Sản phẩm B", 150000, 5),
-            new Product("Sản phẩm C", 200000, 8)
-        };
+            services.Add(new Service(1, "Internet", 50.0m));
+            services.Add(new Service(2, "Hosting", 75.0m));
+            services.Add(new Service(3, "Consulting", 100.0m));
         }
 
-        private void LoadProductsToGrid()
+        private void LoadCustomerData()
         {
-            dataGridViewProducts.DataSource = null;
-            dataGridViewProducts.DataSource = productList;
+            dataGridViewCustomers.DataSource = null;
+            dataGridViewCustomers.DataSource = customers;
         }
 
-        private void LoadCartToGrid()
+        private void LoadServiceData()
         {
-            dataGridViewCart.DataSource = null;
-            dataGridViewCart.DataSource = shoppingCart.CartItems;
-            UpdateTotalPrice();
+            dataGridViewServices.DataSource = null;
+            dataGridViewServices.DataSource = services;
         }
 
-        private void UpdateTotalPrice()
+        private void button1_Click(object sender, EventArgs e)
         {
-            decimal totalPrice = shoppingCart.GetTotalPrice();
-            lblTotalPrice.Text = $"Tổng giá trị: {totalPrice:C}";
+            if (dataGridViewServices.SelectedRows.Count > 0)
+            {
+                int index = dataGridViewServices.SelectedRows[0].Index;
+                var selectedService = services[index];
+                invoiceServices.Add(selectedService);
+
+                dataGridViewInvoice.DataSource = null;
+                dataGridViewInvoice.DataSource = invoiceServices;
+            }
         }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+
+            if (dataGridViewCustomers.SelectedRows.Count > 0)
+            {
+                int customerIndex = dataGridViewCustomers.SelectedRows[0].Index;
+                var customer = customers[customerIndex];
+
+                var invoice = new Invoice(invoiceCounter++, customer, new List<Service>(invoiceServices));
+                MessageBox.Show($"Invoice Created for {customer.Name}\nTotal Amount: {invoice.TotalAmount:C}", "Invoice");
+
+                invoiceServices.Clear();
+                dataGridViewInvoice.DataSource = null;
+            }
+        }
+
+        private void btnAddCustomer_Click(object sender, EventArgs e)
+        {
+            // Giả sử form để thêm thông tin có các TextBox txtName, txtPhone, txtAddress
+            var name = txtName.Text;
+            var phone = txtPhone.Text;
+            var address = txtAddress.Text;
+
+            var customer = new Customer(customerCounter++, name, phone, address);
+            customers.Add(customer);
+            LoadCustomerData();
+        }
+
         private void label2_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void btnEditCustomer_Click(object sender, EventArgs e)
         {
-            var selectedCartItem = GetSelectedCartItem();
-            if (selectedCartItem != null)
+            if (dataGridViewCustomers.SelectedRows.Count > 0)
             {
-                shoppingCart.RemoveFromCart(selectedCartItem);
-                LoadCartToGrid();
+                int index = dataGridViewCustomers.SelectedRows[0].Index;
+                var selectedCustomer = customers[index];
+
+                selectedCustomer.Name = txtName.Text;
+                selectedCustomer.PhoneNumber = txtPhone.Text;
+                selectedCustomer.Address = txtAddress.Text;
+
+                LoadCustomerData();
             }
         }
 
-        private void btnAddToCart_Click(object sender, EventArgs e)
+        private void btnDeleteCustomer_Click(object sender, EventArgs e)
         {
-            var selectedProduct = GetSelectedProduct();
-            if (selectedProduct != null)
+            if (dataGridViewCustomers.SelectedRows.Count > 0)
             {
-                shoppingCart.AddToCart(selectedProduct);
-                LoadCartToGrid();
+                int index = dataGridViewCustomers.SelectedRows[0].Index;
+                customers.RemoveAt(index);
+                LoadCustomerData();
+            }
+        }
+        public class Customer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public string PhoneNumber { get; set; }
+            public string Address { get; set; }
+
+            public Customer(int id, string name, string phoneNumber, string address)
+            {
+                Id = id;
+                Name = name;
+                PhoneNumber = phoneNumber;
+                Address = address;
+            }
+        }
+        public class Service
+        {
+            public int ServiceId { get; set; }
+            public string ServiceName { get; set; }
+            public decimal Price { get; set; }
+
+            public Service(int serviceId, string serviceName, decimal price)
+            {
+                ServiceId = serviceId;
+                ServiceName = serviceName;
+                Price = price;
+            }
+        }
+        public class Invoice
+        {
+            public int InvoiceId { get; set; }
+            public Customer Customer { get; set; }
+            public List<Service> Services { get; set; }
+            public decimal TotalAmount => Services.Sum(s => s.Price);
+
+            public Invoice(int invoiceId, Customer customer, List<Service> services)
+            {
+                InvoiceId = invoiceId;
+                Customer = customer;
+                Services = services;
             }
         }
 
-        private void btnCheckout_Click(object sender, EventArgs e)
+        private void dataGridViewServices_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (shoppingCart.CartItems.Count > 0)
-            {
-                MessageBox.Show("Thanh toán thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                shoppingCart.ClearCart();
-                LoadCartToGrid();
-            }
-            else
-            {
-                MessageBox.Show("Giỏ hàng trống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-        }
-        private Product GetSelectedProduct()
-        {
-            if (dataGridViewProducts.CurrentRow != null)
-            {
-                int selectedIndex = dataGridViewProducts.CurrentRow.Index;
-                return productList[selectedIndex];
-            }
-            return null;
-        }
-        private Product GetSelectedCartItem()
-        {
-            if (dataGridViewCart.CurrentRow != null)
-            {
-                int selectedIndex = dataGridViewCart.CurrentRow.Index;
-                return shoppingCart.CartItems[selectedIndex];
-            }
-            return null;
-        }
-    }
-    public class Product
-    {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public int Quantity { get; set; }
-
-        public Product(string name, decimal price, int quantity)
-        {
-            Name = name;
-            Price = price;
-            Quantity = quantity;
 
         }
-    }
-    public class ShoppingCart
-    {
-        public List<Product> CartItems { get; private set; }
 
-        public ShoppingCart()
+        private void dataGridViewCustomers_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            CartItems = new List<Product>();
-        }
 
-        public void AddToCart(Product product)
-        {
-            var existingProduct = CartItems.FirstOrDefault(p => p.Name == product.Name);
-            if (existingProduct != null)
-                existingProduct.Quantity += product.Quantity;
-            else
-                CartItems.Add(new Product(product.Name, product.Price, product.Quantity));
-        }
-
-        public void RemoveFromCart(Product product)
-        {
-            CartItems.Remove(product);
-        }
-
-        public decimal GetTotalPrice()
-        {
-            return CartItems.Sum(item => item.Price * item.Quantity);
-        }
-
-        public void ClearCart()
-        {
-            CartItems.Clear();
         }
     }
 }
